@@ -1,0 +1,282 @@
+{% extends 'management/base.html' %}
+
+{% block title %}Consulta - {{ consultation.patient }} - GlobalDent{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-6">
+            <a href="{% url 'patient_detail' consultation.patient.pk %}" class="text-sm font-medium text-blue-600 hover:text-blue-500">
+                ← Volver al Paciente
+            </a>
+        </div>
+
+        <!-- Consultation Info -->
+        <div class="overflow-hidden bg-white shadow sm:rounded-lg mb-6">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-start">
+                <div>
+                    <h3 class="text-2xl font-bold leading-6 text-gray-900">Consulta - {{ consultation.patient }}</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ consultation.date|date:"d/m/Y H:i" }}</p>
+                </div>
+                <a href="{% url 'consultation_edit' consultation.pk %}" 
+                   class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                    Editar
+                </a>
+            </div>
+            <div class="border-t border-gray-200">
+                <dl class="divide-y divide-gray-200">
+                    <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Motivo de la consulta</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{{ consultation.reason }}</dd>
+                    </div>
+                    <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Notas de exploración</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{{ consultation.notes|default:"—" }}</dd>
+                    </div>
+                    <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Odontólogo</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                            {{ consultation.user.get_full_name|default:consultation.user.username }}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Odontograma -->
+        <div class="overflow-hidden bg-white shadow sm:rounded-lg mb-6">
+            <div class="px-4 py-5 sm:px-6">
+                <h3 class="text-lg font-semibold leading-6 text-gray-900">Odontograma Actual</h3>
+                <p class="mt-1 text-sm text-gray-500">Estado de los dientes del paciente</p>
+            </div>
+            <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+                <!-- Dientes superiores (1-16) -->
+                <div class="mb-8">
+                    <p class="text-xs font-medium text-gray-500 mb-2 text-center">SUPERIORES (Derecha → Izquierda)</p>
+                    <div class="grid grid-cols-16 gap-1">
+                        {% for tooth in teeth %}
+                            {% if tooth.number_ada <= 16 %}
+                            <div class="flex flex-col items-center">
+                                <div class="w-10 h-10 rounded border-2 flex items-center justify-center text-xs font-semibold
+                                    {% if tooth.status == 'S' %}border-green-500 bg-green-50 text-green-700
+                                    {% elif tooth.status == 'C' %}border-red-500 bg-red-50 text-red-700
+                                    {% elif tooth.status == 'O' %}border-blue-500 bg-blue-50 text-blue-700
+                                    {% elif tooth.status == 'E' %}border-gray-400 bg-gray-100 text-gray-500
+                                    {% elif tooth.status == 'P' %}border-yellow-500 bg-yellow-50 text-yellow-700
+                                    {% endif %}">
+                                    {{ tooth.number_ada }}
+                                </div>
+                                <span class="text-xs mt-1 text-gray-500">{{ tooth.get_status_display|slice:":1" }}</span>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Dientes inferiores (17-32) -->
+                <div>
+                    <p class="text-xs font-medium text-gray-500 mb-2 text-center">INFERIORES (Izquierda → Derecha)</p>
+                    <div class="grid grid-cols-16 gap-1">
+                        {% for tooth in teeth %}
+                            {% if tooth.number_ada >= 17 %}
+                            <div class="flex flex-col items-center">
+                                <div class="w-10 h-10 rounded border-2 flex items-center justify-center text-xs font-semibold
+                                    {% if tooth.status == 'S' %}border-green-500 bg-green-50 text-green-700
+                                    {% elif tooth.status == 'C' %}border-red-500 bg-red-50 text-red-700
+                                    {% elif tooth.status == 'O' %}border-blue-500 bg-blue-50 text-blue-700
+                                    {% elif tooth.status == 'E' %}border-gray-400 bg-gray-100 text-gray-500
+                                    {% elif tooth.status == 'P' %}border-yellow-500 bg-yellow-50 text-yellow-700
+                                    {% endif %}">
+                                    {{ tooth.number_ada }}
+                                </div>
+                                <span class="text-xs mt-1 text-gray-500">{{ tooth.get_status_display|slice:":1" }}</span>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Leyenda -->
+                <div class="mt-6 flex flex-wrap gap-4 justify-center text-xs">
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded border-2 border-green-500 bg-green-50 mr-1"></div>
+                        <span>Sano</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded border-2 border-red-500 bg-red-50 mr-1"></div>
+                        <span>Cariado</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded border-2 border-blue-500 bg-blue-50 mr-1"></div>
+                        <span>Obturado</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded border-2 border-gray-400 bg-gray-100 mr-1"></div>
+                        <span>Extraído</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded border-2 border-yellow-500 bg-yellow-50 mr-1"></div>
+                        <span>Pendiente</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Procedimientos Realizados -->
+        <div class="overflow-hidden bg-white shadow sm:rounded-lg mb-6">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-semibold leading-6 text-gray-900">Procedimientos Realizados</h3>
+                    <p class="mt-1 text-sm text-gray-500">Tratamientos aplicados en esta consulta</p>
+                </div>
+                <a href="{% url 'tooth_procedure_create' consultation.pk %}" 
+                   class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">
+                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                    </svg>
+                    Agregar Procedimiento
+                </a>
+            </div>
+            <div class="border-t border-gray-200">
+                {% if tooth_procedures %}
+                <table class="min-w-full divide-y divide-gray-300">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Diente</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Procedimiento</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Precio</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Notas</th>
+                            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                <span class="sr-only">Acciones</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                        {% for tp in tooth_procedures %}
+                        <tr>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                Diente {{ tp.tooth.number_ada }}
+                            </td>
+                            <td class="px-3 py-4 text-sm text-gray-500">
+                                {{ tp.procedure.name }}
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                ${{ tp.price_charged }}
+                            </td>
+                            <td class="px-3 py-4 text-sm text-gray-500 max-w-xs truncate">
+                                {{ tp.notes|default:"—" }}
+                            </td>
+                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <form method="post" action="{% url 'tooth_procedure_delete' tp.pk %}" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('¿Eliminar este procedimiento?')">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="bg-gray-50">
+                            <td colspan="2" class="py-4 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-6 text-right">
+                                Total:
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm font-bold text-gray-900">
+                                ${{ consultation.total_cost }}
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="px-4 py-8 text-center text-sm text-gray-500">
+                    No se han registrado procedimientos para esta consulta.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pagos -->
+        <div class="overflow-hidden bg-white shadow sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-semibold leading-6 text-gray-900">Pagos</h3>
+                    <p class="mt-1 text-sm text-gray-500">Registro de pagos realizados</p>
+                </div>
+                {% if balance > 0 %}
+                <a href="{% url 'payment_create' consultation.pk %}" 
+                   class="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
+                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                    </svg>
+                    Registrar Pago
+                </a>
+                {% endif %}
+            </div>
+            <div class="border-t border-gray-200">
+                {% if payments %}
+                <table class="min-w-full divide-y divide-gray-300">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Fecha</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Monto</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Método</th>
+                            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                <span class="sr-only">Acciones</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                        {% for payment in payments %}
+                        <tr>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">
+                                {{ payment.payment_date|date:"d/m/Y H:i" }}
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-medium">
+                                ${{ payment.amount }}
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                {{ payment.get_method_display }}
+                            </td>
+                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <form method="post" action="{% url 'payment_delete' payment.pk %}" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('¿Eliminar este pago?')">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="px-4 py-8 text-center text-sm text-gray-500">
+                    No se han registrado pagos para esta consulta.
+                </div>
+                {% endif %}
+
+                <!-- Resumen de pagos -->
+                <div class="bg-gray-50 px-4 py-4 sm:px-6">
+                    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Total a Pagar</dt>
+                            <dd class="mt-1 text-2xl font-semibold text-gray-900">${{ consultation.total_cost }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Total Pagado</dt>
+                            <dd class="mt-1 text-2xl font-semibold text-green-600">${{ total_paid }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Saldo Pendiente</dt>
+                            <dd class="mt-1 text-2xl font-semibold {% if balance > 0 %}text-red-600{% else %}text-gray-900{% endif %}">
+                                ${{ balance }}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
