@@ -1,0 +1,17 @@
+# Entorno virtual
+venv/
+*.pyc
+
+# Base de datos de Django (SQLite)
+db.sqlite3
+/media
+
+# Archivos de configuración de sistema operativo y IDE
+.DS_Store
+.vscode/
+
+# Archivos de migración de Django
+# Excluir la carpeta de migraciones *excepto* el archivo __init__.py
+# Esto permite que otros desarrolladores migren sin problemas.
+*/migrations/*.py
+!*/migrations/__init__.py
