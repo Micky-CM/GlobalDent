@@ -54,7 +54,7 @@
                 <!-- Dientes superiores (1-16) -->
                 <div class="mb-8">
                     <p class="text-xs font-medium text-gray-500 mb-2 text-center">SUPERIORES (Derecha → Izquierda)</p>
-                    <div class="grid grid-cols-16 gap-1">
+                    <div class="flex flex-wrap justify-center gap-1">
                         {% for tooth in teeth %}
                             {% if tooth.number_ada <= 16 %}
                             <div class="flex flex-col items-center">
@@ -77,7 +77,7 @@
                 <!-- Dientes inferiores (17-32) -->
                 <div>
                     <p class="text-xs font-medium text-gray-500 mb-2 text-center">INFERIORES (Izquierda → Derecha)</p>
-                    <div class="grid grid-cols-16 gap-1">
+                    <div class="gflex flex-wrap justify-center gap-1">
                         {% for tooth in teeth %}
                             {% if tooth.number_ada >= 17 %}
                             <div class="flex flex-col items-center">

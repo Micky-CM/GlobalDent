@@ -88,9 +88,9 @@ def patient_detail(request, pk):
     except ClinicalHistory.DoesNotExist:
         history = None
         teeth = []
-    
+
     consultations = patient.consultations.all().order_by('-date')
-    
+
     context = {
         'patient': patient,
         'history': history,
