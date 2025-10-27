@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient, ClinicalHistory, Consultation, Procedure, ToothProcedure, Payment, Tooth
+from .models import Patient, ClinicalHistory, Consultation, Procedure, ToothProcedure, Payment, Tooth, Appointment
 
 
 class PatientForm(forms.ModelForm):
@@ -225,3 +225,60 @@ class PaymentForm(forms.ModelForm):
             'amount': 'Monto',
             'method': 'Método de Pago',
         }
+
+
+class AppointmentForm(forms.ModelForm):
+    """Formulario para crear y editar citas."""
+    
+    class Meta:
+        model = Appointment
+        fields = ['patient', 'date', 'start_time', 'end_time', 'reason', 'notes', 'status']
+        widgets = {
+            'patient': forms.Select(attrs={
+                'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+            }),
+            'date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+            }),
+            'start_time': forms.TimeInput(attrs={
+                'type': 'time',
+                'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+            }),
+            'end_time': forms.TimeInput(attrs={
+                'type': 'time',
+                'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+            }),
+            'reason': forms.TextInput(attrs={
+                'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm',
+                'placeholder': 'Ej: Limpieza dental, Revisión general, etc.'
+            }),
+            'notes': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm',
+                'placeholder': 'Notas adicionales (opcional)'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+            }),
+        }
+        labels = {
+            'patient': 'Paciente',
+            'date': 'Fecha',
+            'start_time': 'Hora de Inicio',
+            'end_time': 'Hora de Fin',
+            'reason': 'Motivo de la Cita',
+            'notes': 'Notas',
+            'status': 'Estado',
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        start_time = cleaned_data.get('start_time')
+        end_time = cleaned_data.get('end_time')
+        
+        if start_time and end_time:
+            if end_time <= start_time:
+                raise forms.ValidationError('La hora de fin debe ser posterior a la hora de inicio.')
+        
+        return cleaned_data

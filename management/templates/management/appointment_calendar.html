@@ -1,0 +1,140 @@
+{% extends 'management/base.html' %}
+
+{% block title %}Agenda Semanal - GlobalDent{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="sm:flex sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Agenda Semanal</h1>
+                <p class="mt-2 text-sm text-gray-700">
+                    {{ start_of_week|date:"d/m/Y" }} - {{ end_of_week|date:"d/m/Y" }}
+                </p>
+            </div>
+            <div class="mt-4 sm:mt-0 flex gap-x-3">
+                <a href="?week={{ prev_week }}" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                    <svg class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                    Semana Anterior
+                </a>
+                <a href="?week=0" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">
+                    Hoy
+                </a>
+                <a href="?week={{ next_week }}" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                    Semana Siguiente
+                    <svg class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </a>
+                <a href="{% url 'appointment_create' %}" class="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
+                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                    </svg>
+                    Nueva Cita
+                </a>
+            </div>
+        </div>
+
+        <!-- Calendario Semanal -->
+        <div class="mt-8 overflow-hidden bg-white shadow sm:rounded-lg">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-300">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="sticky left-0 z-10 bg-gray-50 py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                Hora
+                            </th>
+                            {% for day in week_days %}
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 min-w-[150px]">
+                                <div class="flex flex-col">
+                                    <span class="{% if day.is_today %}text-blue-600 font-bold{% endif %}">
+                                        {{ day.date|date:"l" }}
+                                    </span>
+                                    <span class="text-xs font-normal text-gray-500">
+                                        {{ day.date|date:"d/m" }}
+                                    </span>
+                                </div>
+                            </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                        {% for hour in work_hours %}
+                        <tr>
+                            <td class="sticky left-0 z-10 bg-white whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 border-r">
+                                {{ hour }}
+                            </td>
+                            {% for day in week_days %}
+                            <td class="px-3 py-4 text-sm text-gray-500 relative">
+                                {% for appointment in day.appointments %}
+                                    {% if appointment.start_time|time:"H:i" == hour %}
+                                    <div class="rounded-md p-2 mb-2 cursor-pointer hover:shadow-md transition-shadow
+                                        {% if appointment.status == 'P' %}bg-orange-100 border-l-4 border-orange-500
+                                        {% elif appointment.status == 'C' %}bg-blue-100 border-l-4 border-blue-500
+                                        {% elif appointment.status == 'A' %}bg-green-100 border-l-4 border-green-500
+                                        {% elif appointment.status == 'X' %}bg-red-100 border-l-4 border-red-500{% endif %}">
+                                        <a href="{% url 'appointment_detail' appointment.pk %}" class="block">
+                                            <div class="font-semibold text-gray-900 text-xs">
+                                                {{ appointment.start_time|time:"H:i" }} - {{ appointment.end_time|time:"H:i" }}
+                                            </div>
+                                            <div class="font-medium text-gray-800 text-sm mt-1">
+                                                {{ appointment.patient }}
+                                            </div>
+                                            <div class="text-gray-600 text-xs mt-1 truncate">
+                                                {{ appointment.reason|truncatewords:5 }}
+                                            </div>
+                                            <div class="mt-1">
+                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+                                                    {% if appointment.status == 'P' %}bg-orange-200 text-orange-800
+                                                    {% elif appointment.status == 'C' %}bg-blue-200 text-blue-800
+                                                    {% elif appointment.status == 'A' %}bg-green-200 text-green-800
+                                                    {% elif appointment.status == 'X' %}bg-red-200 text-red-800{% endif %}">
+                                                    {{ appointment.get_status_display }}
+                                                </span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                <!-- Botón para agregar cita en este horario -->
+                                <a href="{% url 'appointment_create' %}?date={{ day.date|date:'Y-m-d' }}&time={{ hour }}" 
+                                   class="hidden group-hover:block absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-75 hover:bg-opacity-100">
+                                    <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                    </svg>
+                                </a>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Leyenda -->
+        <div class="mt-6 flex flex-wrap gap-4 justify-center text-sm">
+            <div class="flex items-center">
+                <div class="w-4 h-4 rounded bg-orange-100 border-l-4 border-orange-500 mr-2"></div>
+                <span>Pendiente</span>
+            </div>
+            <div class="flex items-center">
+                <div class="w-4 h-4 rounded bg-blue-100 border-l-4 border-blue-500 mr-2"></div>
+                <span>Confirmada</span>
+            </div>
+            <div class="flex items-center">
+                <div class="w-4 h-4 rounded bg-green-100 border-l-4 border-green-500 mr-2"></div>
+                <span>Atendida</span>
+            </div>
+            <div class="flex items-center">
+                <div class="w-4 h-4 rounded bg-red-100 border-l-4 border-red-500 mr-2"></div>
+                <span>Cancelada</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

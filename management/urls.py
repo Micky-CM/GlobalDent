@@ -31,4 +31,11 @@ urlpatterns = [
     path('procedures/create/', views.procedure_create, name='procedure_create'),
     path('procedures/<int:pk>/edit/', views.procedure_edit, name='procedure_edit'),
     path('procedures/<int:pk>/delete/', views.procedure_delete, name='procedure_delete'),
+    
+    # Citas / Agenda
+    path('appointments/', views.appointment_calendar, name='appointment_calendar'),
+    path('appointments/create/', views.appointment_create, name='appointment_create'),
+    path('appointments/<int:pk>/', views.appointment_detail, name='appointment_detail'),
+    path('appointments/<int:pk>/edit/', views.appointment_edit, name='appointment_edit'),
+    path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
 ]

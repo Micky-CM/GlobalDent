@@ -6,8 +6,8 @@ from django.db import models
 from django.http import JsonResponse
 from django.utils import timezone
 from decimal import Decimal
-from .models import Patient, ClinicalHistory, Tooth, Consultation, Procedure, ToothProcedure, Payment
-from .forms import PatientForm, ClinicalHistoryForm, ConsultationForm, ProcedureForm, ToothProcedureForm, PaymentForm
+from .models import Patient, ClinicalHistory, Tooth, Consultation, Procedure, ToothProcedure, Payment, Appointment
+from .forms import PatientForm, ClinicalHistoryForm, ConsultationForm, ProcedureForm, ToothProcedureForm, PaymentForm, AppointmentForm
 
 
 # ==================== DASHBOARD ====================
@@ -453,3 +453,119 @@ def procedure_delete(request, pk):
     
     context = {'procedure': procedure}
     return render(request, 'management/procedure_confirm_delete.html', context)
+
+
+# --- Vistas de Citas / Agenda ---
+
+@login_required
+def appointment_calendar(request):
+    """Vista de calendario semanal de citas."""
+    from datetime import datetime, timedelta
+    
+    # Obtener la semana actual o la semana especificada
+    week_offset = int(request.GET.get('week', 0))
+    today = datetime.now().date()
+    
+    # Calcular el inicio de la semana (lunes)
+    start_of_week = today - timedelta(days=today.weekday()) + timedelta(weeks=week_offset)
+    end_of_week = start_of_week + timedelta(days=6)
+    
+    # Obtener citas de la semana
+    appointments = Appointment.objects.filter(
+        date__gte=start_of_week,
+        date__lte=end_of_week,
+        user=request.user
+    ).select_related('patient').order_by('date', 'start_time')
+    
+    # Generar los 7 días de la semana
+    week_days = []
+    for i in range(7):
+        day = start_of_week + timedelta(days=i)
+        day_appointments = appointments.filter(date=day)
+        week_days.append({
+            'date': day,
+            'appointments': day_appointments,
+            'is_today': day == today
+        })
+    
+    # Horarios de trabajo (8:00 AM - 6:00 PM)
+    work_hours = []
+    for hour in range(8, 18):
+        work_hours.append(f"{hour:02d}:00")
+    
+    context = {
+        'week_days': week_days,
+        'work_hours': work_hours,
+        'start_of_week': start_of_week,
+        'end_of_week': end_of_week,
+        'week_offset': week_offset,
+        'prev_week': week_offset - 1,
+        'next_week': week_offset + 1,
+    }
+    return render(request, 'management/appointment_calendar.html', context)
+
+
+@login_required
+def appointment_create(request):
+    """Crear una nueva cita."""
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            appointment = form.save(commit=False)
+            appointment.user = request.user
+            appointment.save()
+            messages.success(request, f'Cita agendada para {appointment.patient} el {appointment.date}.')
+            return redirect('appointment_calendar')
+    else:
+        # Pre-llenar fecha si viene del calendario
+        initial_date = request.GET.get('date')
+        initial_time = request.GET.get('time')
+        initial_data = {}
+        if initial_date:
+            initial_data['date'] = initial_date
+        if initial_time:
+            initial_data['start_time'] = initial_time
+        form = AppointmentForm(initial=initial_data)
+    
+    context = {'form': form}
+    return render(request, 'management/appointment_form.html', context)
+
+
+@login_required
+def appointment_edit(request, pk):
+    """Editar una cita existente."""
+    appointment = get_object_or_404(Appointment, pk=pk)
+    
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST, instance=appointment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cita actualizada exitosamente.')
+            return redirect('appointment_calendar')
+    else:
+        form = AppointmentForm(instance=appointment)
+    
+    context = {'form': form, 'appointment': appointment}
+    return render(request, 'management/appointment_form.html', context)
+
+
+@login_required
+def appointment_delete(request, pk):
+    """Eliminar una cita."""
+    appointment = get_object_or_404(Appointment, pk=pk)
+    
+    if request.method == 'POST':
+        appointment.delete()
+        messages.success(request, 'Cita eliminada exitosamente.')
+        return redirect('appointment_calendar')
+    
+    context = {'appointment': appointment}
+    return render(request, 'management/appointment_confirm_delete.html', context)
+
+
+@login_required
+def appointment_detail(request, pk):
+    """Ver detalle de una cita."""
+    appointment = get_object_or_404(Appointment, pk=pk)
+    context = {'appointment': appointment}
+    return render(request, 'management/appointment_detail.html', context)

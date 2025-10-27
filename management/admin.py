@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
     Patient, ClinicalHistory, Tooth, Consultation, 
-    Procedure, ToothProcedure, Payment
+    Procedure, ToothProcedure, Payment, Appointment
 )
 
 # 1. Registro simple de modelos de catálogo
@@ -205,6 +205,53 @@ class ConsultationAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         """Guarda el usuario que realizó la consulta si no está asignado."""
+        if not obj.user:
+            obj.user = request.user
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(Appointment)
+class AppointmentAdmin(admin.ModelAdmin):
+    """Panel para la gestión de Citas."""
+    list_display = ('patient', 'date', 'start_time', 'end_time', 'status_badge', 'user')
+    list_filter = ('status', 'date', 'user')
+    search_fields = ('patient__first_name', 'patient__paternal_surname', 'reason')
+    date_hierarchy = 'date'
+    readonly_fields = ('created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Información de la Cita', {
+            'fields': ('patient', 'user', 'date', 'start_time', 'end_time')
+        }),
+        ('Detalles', {
+            'fields': ('reason', 'notes', 'status')
+        }),
+        ('Relación con Consulta', {
+            'fields': ('consultation',),
+            'classes': ('collapse',)
+        }),
+        ('Metadatos', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    @admin.display(description='Estado')
+    def status_badge(self, obj):
+        colors = {
+            'P': '#FFA500',  # Naranja - Pendiente
+            'C': '#4169E1',  # Azul - Confirmada
+            'A': '#32CD32',  # Verde - Atendida
+            'X': '#DC143C',  # Rojo - Cancelada
+        }
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px; font-weight: bold;">{}</span>',
+            colors.get(obj.status, '#808080'),
+            obj.get_status_display()
+        )
+    
+    def save_model(self, request, obj, form, change):
+        """Guarda el usuario que agendó la cita si no está asignado."""
         if not obj.user:
             obj.user = request.user
         super().save_model(request, obj, form, change)
