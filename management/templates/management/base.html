@@ -20,24 +20,6 @@
             transition-property: all;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
-        /* Tooltip styles for collapsed sidebar */
-        [title]:hover::after {
-            content: attr(title);
-            position: absolute;
-            left: 100%;
-            top: 50%;
-            transform: translateY(-50%);
-            margin-left: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            background-color: #1f2937;
-            color: white;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            white-space: nowrap;
-            z-index: 50;
-            pointer-events: none;
-        }
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -83,9 +65,8 @@
                 <div class="flex flex-1 flex-col overflow-y-auto">
                     <nav class="flex-1 space-y-1 px-2 py-4">
                         <a href="{% url 'dashboard' %}" 
-                           class="{% if request.resolver_match.url_name == 'dashboard' %}bg-blue-800 text-white{% else %}text-blue-100 hover:bg-blue-800{% endif %} group flex items-center px-2 py-2 text-sm font-medium rounded-md relative"
-                           :class="sidebarCollapsed ? 'justify-center' : ''"
-                           :title="sidebarCollapsed ? 'Dashboard' : ''">
+                           class="{% if request.resolver_match.url_name == 'dashboard' %}bg-blue-800 text-white{% else %}text-blue-100 hover:bg-blue-800{% endif %} group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+                           :class="sidebarCollapsed ? 'justify-center' : ''">
                             <svg class="h-6 w-6 flex-shrink-0 {% if request.resolver_match.url_name == 'dashboard' %}text-white{% else %}text-blue-300{% endif %}" 
                                  :class="sidebarCollapsed ? '' : 'mr-3'"
                                  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -96,8 +77,7 @@
 
                         <a href="{% url 'patient_list' %}" 
                            class="{% if 'patient' in request.resolver_match.url_name %}bg-blue-800 text-white{% else %}text-blue-100 hover:bg-blue-800{% endif %} group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-                           :class="sidebarCollapsed ? 'justify-center' : ''"
-                           :title="sidebarCollapsed ? 'Pacientes' : ''">
+                           :class="sidebarCollapsed ? 'justify-center' : ''">
                             <svg class="h-6 w-6 flex-shrink-0 {% if 'patient' in request.resolver_match.url_name %}text-white{% else %}text-blue-300{% endif %}" 
                                  :class="sidebarCollapsed ? '' : 'mr-3'"
                                  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -108,8 +88,7 @@
 
                         <a href="{% url 'consultation_list' %}" 
                            class="{% if 'consultation' in request.resolver_match.url_name %}bg-blue-800 text-white{% else %}text-blue-100 hover:bg-blue-800{% endif %} group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-                           :class="sidebarCollapsed ? 'justify-center' : ''"
-                           :title="sidebarCollapsed ? 'Consultas' : ''">
+                           :class="sidebarCollapsed ? 'justify-center' : ''">
                             <svg class="h-6 w-6 flex-shrink-0 {% if 'consultation' in request.resolver_match.url_name %}text-white{% else %}text-blue-300{% endif %}" 
                                  :class="sidebarCollapsed ? '' : 'mr-3'"
                                  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -120,8 +99,7 @@
 
                         <a href="{% url 'procedure_list' %}" 
                            class="{% if 'procedure' in request.resolver_match.url_name %}bg-blue-800 text-white{% else %}text-blue-100 hover:bg-blue-800{% endif %} group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-                           :class="sidebarCollapsed ? 'justify-center' : ''"
-                           :title="sidebarCollapsed ? 'Procedimientos' : ''">
+                           :class="sidebarCollapsed ? 'justify-center' : ''">
                             <svg class="h-6 w-6 flex-shrink-0 {% if 'procedure' in request.resolver_match.url_name %}text-white{% else %}text-blue-300{% endif %}" 
                                  :class="sidebarCollapsed ? '' : 'mr-3'"
                                  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -132,8 +110,7 @@
 
                         <a href="{% url 'appointment_calendar' %}" 
                            class="{% if 'appointment' in request.resolver_match.url_name %}bg-blue-800 text-white{% else %}text-blue-100 hover:bg-blue-800{% endif %} group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-                           :class="sidebarCollapsed ? 'justify-center' : ''"
-                           :title="sidebarCollapsed ? 'Agenda' : ''">
+                           :class="sidebarCollapsed ? 'justify-center' : ''">
                             <svg class="h-6 w-6 flex-shrink-0 {% if 'appointment' in request.resolver_match.url_name %}text-white{% else %}text-blue-300{% endif %}" 
                                  :class="sidebarCollapsed ? '' : 'mr-3'"
                                  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

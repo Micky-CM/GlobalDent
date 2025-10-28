@@ -71,7 +71,7 @@
                             </div>
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt class="truncate text-sm font-medium text-gray-500">Procedimientos Realizados</dt>
+                                    <dt class="truncate text-sm font-medium text-gray-500">Procedimientos</dt>
                                     <dd class="text-3xl font-semibold text-gray-900">{{ total_procedures }}</dd>
                                 </dl>
                             </div>
@@ -96,7 +96,7 @@
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
                                     <dt class="truncate text-sm font-medium text-gray-500">Ingresos del Mes</dt>
-                                    <dd class="text-3xl font-semibold text-gray-900">${{ monthly_income }}</dd>
+                                    <dd class="text-3xl font-semibold text-gray-900">Bs. {{ monthly_income|floatformat:2 }}</dd>
                                 </dl>
                             </div>
                         </div>
@@ -231,13 +231,13 @@
                                         {{ consultation.date|date:"d/m/Y" }}
                                     </td>
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                        ${{ consultation.total_cost }}
+                                        Bs. {{ consultation.total_cost|floatformat:2 }}
                                     </td>
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                        ${{ consultation.total_paid|default:"0.00" }}
+                                        Bs. {{ consultation.total_paid|floatformat:2 }}
                                     </td>
                                     <td class="whitespace-nowrap px-3 py-4 text-sm font-semibold text-red-600">
-                                        ${{ consultation.get_balance }}
+                                        Bs. {{ consultation.get_balance|floatformat:2 }}
                                     </td>
                                     <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                         <a href="{% url 'consultation_detail' consultation.pk %}" class="text-blue-600 hover:text-blue-900">

@@ -10,7 +10,7 @@ from .models import Patient, ClinicalHistory, Tooth, Consultation, Procedure, To
 from .forms import PatientForm, ClinicalHistoryForm, ConsultationForm, ProcedureForm, ToothProcedureForm, PaymentForm, AppointmentForm
 
 
-# ==================== DASHBOARD ====================
+# DASHBOARD
 
 @login_required
 def dashboard(request):
@@ -18,13 +18,13 @@ def dashboard(request):
     total_patients = Patient.objects.count()
     total_consultations = Consultation.objects.count()
     total_procedures = ToothProcedure.objects.count()
-    
+
     # Consultas recientes
     recent_consultations = Consultation.objects.select_related('patient', 'user').order_by('-date')[:5]
-    
+
     # Pacientes recientes
     recent_patients = Patient.objects.order_by('-created_at')[:5]
-    
+
     # Ingresos del mes actual
     current_month = timezone.now().month
     current_year = timezone.now().year
@@ -32,14 +32,14 @@ def dashboard(request):
         payment_date__month=current_month,
         payment_date__year=current_year
     ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
-    
+
     # Consultas pendientes de pago
     pending_consultations = Consultation.objects.annotate(
         total_paid=Sum('payments__amount')
     ).filter(
         Q(total_paid__lt=F('total_cost')) | Q(total_paid__isnull=True)
     ).exclude(total_cost=0)[:5]
-    
+
     context = {
         'total_patients': total_patients,
         'total_consultations': total_consultations,
@@ -52,7 +52,7 @@ def dashboard(request):
     return render(request, 'management/dashboard.html', context)
 
 
-# ==================== PACIENTES ====================
+# PACIENTES
 
 @login_required
 def patient_list(request):
@@ -182,7 +182,7 @@ def patient_delete(request, pk):
     return render(request, 'management/patient_confirm_delete.html', context)
 
 
-# ==================== CONSULTAS ====================
+# CONSULTAS
 
 @login_required
 def consultation_list(request):
@@ -270,7 +270,7 @@ def consultation_edit(request, pk):
     return render(request, 'management/consultation_form.html', context)
 
 
-# ==================== PROCEDIMIENTOS EN DIENTES ====================
+# PROCEDIMIENTOS EN DIENTES
 
 @login_required
 def tooth_procedure_create(request, consultation_pk):
@@ -337,7 +337,7 @@ def tooth_procedure_delete(request, pk):
     return render(request, 'management/tooth_procedure_confirm_delete.html', context)
 
 
-# ==================== PAGOS ====================
+# PAGOS
 
 @login_required
 def payment_create(request, consultation_pk):
@@ -386,7 +386,7 @@ def payment_delete(request, pk):
     return render(request, 'management/payment_confirm_delete.html', context)
 
 
-# ==================== PROCEDIMIENTOS (CATÁLOGO) ====================
+# PROCEDIMIENTOS (CATÁLOGO)
 
 @login_required
 def procedure_list(request):
